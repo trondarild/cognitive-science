@@ -27,7 +27,7 @@ logfiledir = "./logs"
 fadestep = 0.15
 startimgname = "startimage.png"
 startimage = loadImage(startimgname)
-
+fullscreen = True
 # globals
 imgnames=[]
 images=[]
@@ -37,6 +37,7 @@ nbacknum=0
 fadecounter = 0
 imgix = 0
 imgchanged = False
+sessionid = 0
 
 SPACE=32
 RETURN=13
@@ -100,9 +101,9 @@ def setup():
 	imgix = random.randint(0, len(images)-1)
 	global dque
 	dque.appendleft(imgix)
-	writeToLogFile(imgnames[imgix]+","+str(nbacknum), logfilename)
+	writeToLogFile(imgnames[imgix] + "," + str(nbacknum) + "," + str(sessionid), logfilename)
 	background(0)
-	size(1024, 768, fullscreen=False)
+	size(1024, 768, fullscreen=fullscreen)
 
 def draw():
 	background(0);
@@ -129,7 +130,7 @@ def draw():
 			else:
 				imgix = random.randint(0, len(images)-1)
 
-			writeToLogFile(imgnames[imgix]+","+str(nbacknum), logfilename)
+			writeToLogFile(imgnames[imgix] + "," + str(nbacknum) + "," + str(sessionid), logfilename)
 			# image changed so append to queue
 			dque.appendleft(imgix)
 		elif imgchanged and fadeval >= 0.01:
@@ -143,13 +144,28 @@ def draw():
 		if (fadeval>=0.99 and not imgchanged):
 			sleep(changeinterval)
 	else:
-		image(startimage, width/2-startimage.width/2, height/2-startimage.height/2)
+		x = width/2
+		y = height/2
+		tint(255,255)
+		image(startimage, x - startimage.width/2, y - startimage.height/2)
+		textSize(32);
+		fill(127)
+		sessionstr = "Next session id = " + str(sessionid+1)
+		strwidth = textWidth(sessionstr)
+		text(sessionstr, x - strwidth/2, y + startimage.height); 
 
 def keyPressed():
 	if(key.code == SPACE or key.code == ENTER or key.code == RETURN):
-		print "starting"
+		if not start:
+			global sessionid
+			sessionid += 1
+			
+			global fadecounter
+			fadecounter = 0
+			
+			print "starting session " + str(sessionid)
 		global start
-		start = True
+		start = not start
 
 
 run()
