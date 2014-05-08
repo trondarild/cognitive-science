@@ -23,6 +23,7 @@ imgroot = "./images/"
 timeformatstr = "%Y-%m-%d_%H:%M:%S"
 logfilename = "data_" + datetime.datetime.now().strftime(timeformatstr) + ".csv"
 logfiledir = "./logs"
+logheader = "time,image,nback,sessionid"
 # difference in alpha value for each fade step
 fadestep = 0.15
 startimgname = "startimage.png"
@@ -43,10 +44,13 @@ SPACE=32
 RETURN=13
 ENTER=10
 
-def writeToLogFile(sentence, logfilename):
+def writeToLogFile(sentence, logfilename, timestamp=True):
 	# make logitem
-	now = datetime.datetime.now().strftime(timeformatstr)
-	logitem = now + "," + sentence
+	logitem = ""
+	if timestamp:
+		now = datetime.datetime.now().strftime(timeformatstr)
+		logitem = now + "," 
+	logitem += sentence
 	# write sentence to logfile
 	with open(os.path.join(logfiledir,logfilename), "a") as myfile:
 		myfile.write(logitem+"\n")
@@ -101,6 +105,7 @@ def setup():
 	imgix = random.randint(0, len(images)-1)
 	global dque
 	dque.appendleft(imgix)
+	writeToLogFile(logheader, logfilename, timestamp=False)
 	writeToLogFile(imgnames[imgix] + "," + str(nbacknum) + "," + str(sessionid), logfilename)
 	background(0)
 	size(1024, 768, fullscreen=fullscreen)
@@ -173,7 +178,7 @@ run()
 '''
 if __name__ == '__main__':
 	#print loadImages(getImageNames(root))
-	writeToLogFile("img-1", logfilename)
+	writeToLogFile(logheader, logfilename, False)
 	writeToLogFile("img-2", logfilename)
 
 	#while fadecounter<20:
