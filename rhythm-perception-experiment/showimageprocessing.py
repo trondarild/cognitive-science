@@ -98,26 +98,27 @@ def draw():
 		global imgchanged
 
 		fadeval = fade()
-		print fadeval
-		if fadeval <= 0.01:# and not imgchanged :
+		#print fadeval
+		if fadeval <= 0.01 and not imgchanged :
 			
 			imgchanged = True
+			writeToLogFile(imgnames[imgix]+","+str(nbacknum), logfilename)
 			# change imageix	
 			if len(dque) >= nback:
 				nbackix = dque.pop()
 				imgix,nbackcnt = getProbIndex(nbackix, nbackprob, len(images))
 				nbacknum += nbackcnt
-		#elif imgchanged and fadeval >= 0.01:
-		#	imgchanged = False
+		elif imgchanged and fadeval >= 0.01:
+			imgchanged = False
 
-		print imgix
+		#print imgix
 		f = images[imgix]
 		
 		image(f, width/2-f.width/2, height/2-f.height/2)
 		# fade out
 		if (fadeval>=0.99):
 			sleep(changeinterval)
-		writeToLogFile(imgnames[imgix]+","+str(nbacknum), logfilename)
+		
 		dque.appendleft(imgix)
 run()
 
