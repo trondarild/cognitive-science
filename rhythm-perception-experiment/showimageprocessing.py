@@ -12,23 +12,35 @@ import collections
 
 # parameters
 nback = 2
+# probability of changing to a new image or using the n-back image
 nbackprob = 0.5
 imgext = (".jpg", ".jpeg", ".png", ".gif")
 changeinterval = 0.5
-#root = '/home/trond/Code/cognitive-science/rhythm-perception-experiment/images'
-root = "./images/"
-start = True
+
+# 
+imgroot = "./images/"
+
 timeformatstr = "%Y-%m-%d_%H:%M:%S"
 logfilename = "data_" + datetime.datetime.now().strftime(timeformatstr) + ".csv"
 logfiledir = "./logs"
+# difference in alpha value for each fade step
+fadestep = 0.15
+startimgname = "startimage.png"
+startimage = loadImage(startimgname)
+
+# globals
 imgnames=[]
 images=[]
 dque = collections.deque()
+start = False
 nbacknum=0
 fadecounter = 0
 imgix = 0
-fadestep = 0.45
 imgchanged = False
+
+SPACE=32
+RETURN=13
+ENTER=10
 
 def writeToLogFile(sentence, logfilename):
 	# make logitem
@@ -78,7 +90,7 @@ def fade():
 
 def setup():
 	global imgnames
-	imgnames = getImageNames(root)
+	imgnames = getImageNames(imgroot)
 	# need this to use the global variable
 	global images
 	images = loadImages(imgnames)
@@ -93,10 +105,11 @@ def setup():
 	size(1024, 768, fullscreen=False)
 
 def draw():
+	background(0);
+
 	if(start):
 		# get a random image, same as nback with prob p
 		# fade in
-		background(0);
 		
 		global dque
 		global nbacknum
@@ -127,9 +140,18 @@ def draw():
 		
 		image(f, width/2-f.width/2, height/2-f.height/2)
 		# fade out
-		#if (fadeval>=0.99):
-		#	sleep(changeinterval)
-		
+		if (fadeval>=0.99 and not imgchanged):
+			sleep(changeinterval)
+	else:
+		image(startimage, width/2-startimage.width/2, height/2-startimage.height/2)
+
+def keyPressed():
+	if(key.code == SPACE or key.code == ENTER or key.code == RETURN):
+		print "starting"
+		global start
+		start = True
+
+
 run()
 
 '''
