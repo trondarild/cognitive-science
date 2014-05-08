@@ -15,9 +15,11 @@ nback = 2
 nbackprob = 0.5
 imgext = (".jpg", ".jpeg", ".png", ".gif")
 changeinterval = 0.5
-root = '/Users/trondarildtjstheim/Dropbox/kode/python/project_course_rhythm'
+#root = '/home/trond/Code/cognitive-science/rhythm-perception-experiment/images'
+root = "./images/"
 start = True
 logfilename = "data_" + unicode(datetime.datetime.now()) + ".csv"
+logfiledir = "./logs"
 imgnames=[]
 images=[]
 dque = collections.deque()
@@ -25,12 +27,14 @@ nbacknum=0
 fadecounter = 0
 imgix = 0
 fadestep = 0.15
+imgchanged = False
+
 def writeToLogFile(sentence, logfilename):
 	# make logitem
 	now = datetime.datetime.now()
 	logitem = unicode(now) + "," + sentence
 	# write sentence to logfile
-	with open(logfilename, "a") as myfile:
+	with open(os.path.join(logfiledir,logfilename), "a") as myfile:
 		myfile.write(logitem+"\n")
 
 def getImageNames(root):
@@ -64,11 +68,11 @@ def fade():
 	# global transparency
 	global fadecounter
 	
-	fadeval = 255*sin(fadecounter)
+	fadeval = 255*map(sin(fadecounter), -1,1,0,1)
+	#print fadeval
 	tint(255, fadeval)
 	fadecounter +=fadestep
-	print fadeval
-	return map(fadeval, -255, 255, 0, 1)
+	return map(fadeval, 0, 255, 0, 1)
 
 
 def setup():
@@ -77,8 +81,10 @@ def setup():
 	# need this to use the global variable
 	global images
 	images = loadImages(imgnames)
+	global imgix
+	imgix = random.randint(0, len(images)-1)
 	background(0)
-	size(1024, 768, fullscreen=True)
+	size(1024, 768, fullscreen=False)
 
 def draw():
 	if(start):
@@ -89,18 +95,22 @@ def draw():
 		global dque
 		global nbacknum
 		global imgix
+		global imgchanged
 
 		fadeval = fade()
 		print fadeval
-		if (fadeval <= 0.01):
-			imgix = random.randint(0, len(images)-1)
+		if fadeval <= 0.01:# and not imgchanged :
+			
+			imgchanged = True
 			# change imageix	
 			if len(dque) >= nback:
 				nbackix = dque.pop()
 				imgix,nbackcnt = getProbIndex(nbackix, nbackprob, len(images))
-				nbacknum+=nbackcnt
+				nbacknum += nbackcnt
+		#elif imgchanged and fadeval >= 0.01:
+		#	imgchanged = False
+
 		print imgix
-		print len(images)
 		f = images[imgix]
 		
 		image(f, width/2-f.width/2, height/2-f.height/2)
@@ -113,6 +123,10 @@ run()
 
 '''
 if __name__ == '__main__':
-	writeToLogFile("img-1", logfilename)
-	writeToLogFile("img-2", logfilename)
+	#print loadImages(getImageNames(root))
+	#writeToLogFile("img-1", logfilename)
+	#writeToLogFile("img-2", logfilename)
+
+	while fadecounter<20:
+		fade()
 '''
