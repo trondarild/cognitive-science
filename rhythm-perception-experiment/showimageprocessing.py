@@ -18,7 +18,8 @@ changeinterval = 0.5
 #root = '/home/trond/Code/cognitive-science/rhythm-perception-experiment/images'
 root = "./images/"
 start = True
-logfilename = "data_" + unicode(datetime.datetime.now()) + ".csv"
+timeformatstr = "%Y-%m-%d_%H:%M:%S"
+logfilename = "data_" + datetime.datetime.now().strftime(timeformatstr) + ".csv"
 logfiledir = "./logs"
 imgnames=[]
 images=[]
@@ -26,13 +27,13 @@ dque = collections.deque()
 nbacknum=0
 fadecounter = 0
 imgix = 0
-fadestep = 0.15
+fadestep = 0.45
 imgchanged = False
 
 def writeToLogFile(sentence, logfilename):
 	# make logitem
-	now = datetime.datetime.now()
-	logitem = unicode(now) + "," + sentence
+	now = datetime.datetime.now().strftime(timeformatstr)
+	logitem = now + "," + sentence
 	# write sentence to logfile
 	with open(os.path.join(logfiledir,logfilename), "a") as myfile:
 		myfile.write(logitem+"\n")
@@ -81,8 +82,13 @@ def setup():
 	# need this to use the global variable
 	global images
 	images = loadImages(imgnames)
+	
+	# initialize first image and add to nback queue
 	global imgix
 	imgix = random.randint(0, len(images)-1)
+	global dque
+	dque.appendleft(imgix)
+	writeToLogFile(imgnames[imgix]+","+str(nbacknum), logfilename)
 	background(0)
 	size(1024, 768, fullscreen=False)
 
@@ -99,15 +105,20 @@ def draw():
 
 		fadeval = fade()
 		#print fadeval
-		if fadeval <= 0.01 and not imgchanged :
-			
-			imgchanged = True
-			writeToLogFile(imgnames[imgix]+","+str(nbacknum), logfilename)
+		if fadeval <= 0.01 and not imgchanged :			
 			# change imageix	
 			if len(dque) >= nback:
+				# pop from right side of queue
 				nbackix = dque.pop()
 				imgix,nbackcnt = getProbIndex(nbackix, nbackprob, len(images))
 				nbacknum += nbackcnt
+				imgchanged = True
+			else:
+				imgix = random.randint(0, len(images)-1)
+
+			writeToLogFile(imgnames[imgix]+","+str(nbacknum), logfilename)
+			# image changed so append to queue
+			dque.appendleft(imgix)
 		elif imgchanged and fadeval >= 0.01:
 			imgchanged = False
 
@@ -116,18 +127,17 @@ def draw():
 		
 		image(f, width/2-f.width/2, height/2-f.height/2)
 		# fade out
-		if (fadeval>=0.99):
-			sleep(changeinterval)
+		#if (fadeval>=0.99):
+		#	sleep(changeinterval)
 		
-		dque.appendleft(imgix)
 run()
 
 '''
 if __name__ == '__main__':
 	#print loadImages(getImageNames(root))
-	#writeToLogFile("img-1", logfilename)
-	#writeToLogFile("img-2", logfilename)
+	writeToLogFile("img-1", logfilename)
+	writeToLogFile("img-2", logfilename)
 
-	while fadecounter<20:
-		fade()
+	#while fadecounter<20:
+	#	fade()
 '''
