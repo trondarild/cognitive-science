@@ -56,7 +56,7 @@ def writeToLogFile(sentence, logfilename, timestamp=True):
 		myfile.write(logitem+"\n")
 
 def getImageNames(root):
-	imagenames=[]
+	imagenames = []
 	for path, subdirs, files in os.walk(root):
 		for name in files:
 			if name.endswith(imgext):
@@ -74,22 +74,21 @@ def getProbIndex(default, prob, max):
 	# return default with probability prob,
 	# or a random number from 0 to max
 	dodefault = np.random.multinomial(1, [prob, 1-prob])[0]
-	# make a list to draw from which doesnt contain default
-	lst = [i for i in range(max) if i!=default]
-
 	if dodefault:
 		return default, 1
 	else:
+		# make a list to draw from which doesnt contain default
+		lst = [i for i in range(max) if i!=default]
 		return random.choice(lst), 0
 
 def fade():
 	# global transparency
 	global fadecounter
 	
-	fadeval = 255*map(sin(fadecounter), -1,1,0,1)
+	fadeval = 255*map(sin(fadecounter), -1,1, 0,1)
 	#print fadeval
 	tint(255, fadeval)
-	fadecounter +=fadestep
+	fadecounter += fadestep
 	return map(fadeval, 0, 255, 0, 1)
 
 
@@ -167,6 +166,10 @@ def keyPressed():
 			
 			global fadecounter
 			fadecounter = 0
+			global nbacknum
+			nbacknum = 0
+			global dque
+			dque.clear()
 			
 			print "starting session " + str(sessionid)
 		global start
@@ -178,9 +181,11 @@ run()
 '''
 if __name__ == '__main__':
 	#print loadImages(getImageNames(root))
-	writeToLogFile(logheader, logfilename, False)
-	writeToLogFile("img-2", logfilename)
+	#writeToLogFile(logheader, logfilename, False)
+	#writeToLogFile("img-2", logfilename)
 
+	for i in range(10):
+		print getProbIndex(1,0.5,10)
 	#while fadecounter<20:
 	#	fade()
 '''
