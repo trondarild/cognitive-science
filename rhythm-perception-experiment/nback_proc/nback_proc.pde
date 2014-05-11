@@ -11,8 +11,7 @@ import java.util.Random;
 //
 int nback = 2;
 float nbackprob = 0.5;
-float changeinterval = 0.5;
-
+float changeinterval = 0.5; 
 
 String imgroot = "/../images/";
 String logfiledir = "/../logs/";
@@ -27,7 +26,7 @@ int sessionchanges = 10;
 
 String startimgname = "/../startimage.png";
 PImage startimage;
-boolean fullscreen = false;
+boolean fullscreen = true;
 
 // globals
 PrintWriter output;
@@ -157,12 +156,12 @@ void setup(){
   writeToLogFile(logheader, output, false);
   writeToLogFile(imgnames[imgix] + "," 
     + String.valueOf(nbacknum) + ","
-    + String.valueOf(sessionid)
-    , output, false);
+    + String.valueOf(sessionid+1)
+    , output, true  );
   frameRate(framerate);
   startimage = loadImage(sketchPath + startimgname);
   background(0);
-  size(1024, 768);
+  size(1280, 800 );
   frametime = millis();
 }
 
@@ -227,4 +226,8 @@ void keyPressed(){
     }
     start = !start;
   }  
+}
+
+boolean sketchFullScreen(){
+  return fullscreen;
 }
