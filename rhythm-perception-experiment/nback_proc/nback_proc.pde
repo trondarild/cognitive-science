@@ -13,13 +13,13 @@ int nback = 2;
 float nbackprob = 0.5;
 float changeinterval = 0.5; 
 
-String imgroot = "/../images/";
+String imgroot = "/../images/snodgrass/";
 String logfiledir = "/../logs/";
 String logheader = "time,image,nback,sessionid";
 
 float framerate = 15;
-float changetime = 1000;
-float fadetime = 300;
+float changetime = 2000;
+float fadetime = 500;
 float holdtime = changetime - fadetime;
 float fadestep = framerate*fadetime;
 int sessionchanges = 10;
@@ -136,7 +136,7 @@ float fade(float starttime, float fadetime, float holdtime) {
     fadeval = map(sincestart/fadetime, 0, 1, 0, 255); 
   } else if(sincestart >= fadetime + holdtime) {
     // should fade out  
-    fadeval = map((sincestart-(fadetime+holdtime))/fadetime, 0, 1, 0, 255); 
+    fadeval = map((sincestart-(fadetime+holdtime))/fadetime, 0, 1, 255, 0); 
   }
   //float fadeval = 255.0*map(sin(fadecounter), -1, 1, 0, 1);
   //println(fadeval);
