@@ -4,7 +4,7 @@ Information here
 
 */
 
-import java.util.Deque;
+import java.util.ArrayDeque;
 import java.util.Random;
 //
 // parameters
@@ -13,21 +13,19 @@ int nback = 2;
 float nbackprob = 0.5;
 float changeinterval = 0.5;
 
+
 String imgroot = "/../images/";
-String year = String.valueOf(year());
-String month = String.valueOf(month());
-String day = String.valueOf(day());
-String hour = String.valueOf(hour());
-String minute = String.valueOf(minute());
-String second = String.valueOf(second());
-String timeformatstr = year + "-" + month + "-" + day + "_" + hour + ":" + minute + ":" + second;//"Y-%m-%d_%H:%M:%S";
-//String logfilename = "data_" + timeformatstr + ".csv";
 String logfiledir = "/../logs/";
 String logheader = "time,image,nback,sessionid";
 
-// difference in alpha value for each fade step
-float fadestep = 0.15;
-String startimgname = "/../startimg.png";
+float framerate = 15;
+float changetime = 1000;
+float fadetime = 300;
+float holdtime = changetime - fadetime;
+float fadestep = framerate*fadetime;
+int sessionchanges = 10;
+
+String startimgname = "/../startimage.png";
 PImage startimage;
 boolean fullscreen = false;
 
@@ -35,7 +33,7 @@ boolean fullscreen = false;
 PrintWriter output;
 String[] imgnames;
 ArrayList<PImage> images;
-Deque<PImage> dque;
+ArrayDeque<Integer> dque;
 boolean start = false;
 int nbacknum = 0;
 float fadecounter = 0;
@@ -43,7 +41,8 @@ int imgix = 0;
 boolean imgchanged = false;
 int sessionid = 0;
 Random generator = new Random();
-
+float frametime = 0;
+int changecount = 0; 
 final int SPACE = 32;
 
 // returns a string with current date to seconds resolution
@@ -130,8 +129,17 @@ int getBinomial(int n, double p) {
 }
 
 // fades picture
-float fade(){
-  float fadeval = 255.0*map(sin(fadecounter), -1, 1, 0, 1);
+float fade(float starttime, float fadetime, float holdtime) {
+  float sincestart = millis() - starttime;
+  float fadeval = 255;
+  if(sincestart < fadetime) {
+    // should fade in
+    fadeval = map(sincestart/fadetime, 0, 1, 0, 255); 
+  } else if(sincestart >= fadetime + holdtime) {
+    // should fade out  
+    fadeval = map((sincestart-(fadetime+holdtime))/fadetime, 0, 1, 0, 255); 
+  }
+  //float fadeval = 255.0*map(sin(fadecounter), -1, 1, 0, 1);
   //println(fadeval);
   tint(255, fadeval);
   fadecounter += fadestep;
@@ -143,18 +151,63 @@ void setup(){
   images = loadImages(sketchPath + imgroot, imgnames);
   String logfilename = "data_" + now() + ".csv";
   output = createWriter(sketchPath + logfiledir + logfilename);
-  //writeToLogFile(logheader, output, false);
-  //writeToLogFile("one,two,three,four", output, false);
-  
+  imgix = int(random(0, images.size()));
+  dque = new ArrayDeque<Integer>();
+  dque.add(imgix);
+  writeToLogFile(logheader, output, false);
+  writeToLogFile(imgnames[imgix] + "," 
+    + String.valueOf(nbacknum) + ","
+    + String.valueOf(sessionid)
+    , output, false);
+  frameRate(framerate);
+  startimage = loadImage(sketchPath + startimgname);
   background(0);
   size(1024, 768);
+  frametime = millis();
 }
 
 void draw(){
   background(0);
-  fade();
-  image(images.get(0), width/2, height/2);
-  
+  float timesince = millis() - frametime;
+  if(changecount >= sessionchanges)
+    start = false;
+    
+  if(start){
+    float fadeval = fade(frametime, fadetime, holdtime);
+    if(timesince >= changetime && !imgchanged){
+      if(dque.size() >= nback){
+        int nbackix = dque.remove().intValue();
+        int[] probix = getProbIndex(nbackix, nbackprob, images.size());
+        imgix = probix[0];
+        nbacknum += probix[1];
+        imgchanged = true;  
+      } else {
+        imgix = int(random(0, images.size())); 
+      }
+      writeToLogFile(imgnames[imgix] + "," 
+        + String.valueOf(nbacknum) + ","
+        + String.valueOf(sessionid)
+        , output, true);
+      dque.add(imgix);
+      changecount++;
+      frametime = millis();
+    } else if(imgchanged && fadeval >= 0.01)
+      imgchanged = false;
+      
+    //println(imgix);
+    PImage img = images.get(imgix);
+    image(img, width/2 - img.width/2, height/2 - img.height/2);
+    
+    // add sleep here
+  } else {
+    tint(255, 255);
+    image(startimage, width/2 - startimage.width/2, height/2 - startimage.height/2);
+    textSize(32);
+    fill(127);
+    String sessionstr = "Next session id = " + String.valueOf(sessionid + 1);
+    float strwidth = textWidth(sessionstr);
+    text(sessionstr, width/2 - strwidth/2.0, height/2 + startimage.height);
+  }
 }
 
 void stop(){
@@ -163,6 +216,15 @@ void stop(){
 
 void keyPressed(){
   if(keyCode == SPACE || keyCode == ENTER || keyCode == RETURN){
-    println("hello");
+    if(!start){
+      sessionid++;
+      fadecounter = 0;
+      nbacknum = 0;
+      dque.clear();
+      frametime = millis();
+      changecount = 0;
+      println("starting session" + String.valueOf(sessionid)); 
+    }
+    start = !start;
   }  
 }
