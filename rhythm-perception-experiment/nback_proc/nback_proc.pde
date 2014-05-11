@@ -13,20 +13,20 @@ int nback = 2;
 float nbackprob = 0.5;
 float changeinterval = 0.5; 
 
-String imgroot = "/../images/snodgrass/";
+String imgroot = "/../images/abstract/";
 String logfiledir = "/../logs/";
 String logheader = "time,image,nback,sessionid";
 
 float framerate = 15;
-float changetime = 2000;
-float fadetime = 500;
-float holdtime = changetime - fadetime;
+float changetime = 1600;
+float fadetime = 300;
+float holdtime = changetime - 2*fadetime;
 float fadestep = framerate*fadetime;
 int sessionchanges = 10;
 
 String startimgname = "/../startimage.png";
 PImage startimage;
-boolean fullscreen = true;
+boolean fullscreen = false;
 
 // globals
 PrintWriter output;
