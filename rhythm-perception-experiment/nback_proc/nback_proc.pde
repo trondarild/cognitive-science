@@ -166,6 +166,7 @@ void setup(){
 }
 
 void draw(){
+  requestFocusInWindow();
   background(0);
   float timesince = millis() - frametime;
   if(changecount >= sessionchanges)
